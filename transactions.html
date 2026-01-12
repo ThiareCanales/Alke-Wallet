@@ -1,18 +1,59 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Historial de Transacciones - Alke Wallet</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transacciones | Alke Wallet</title>
 
-  </head>
-  <body>
-    <main>
-      <h1>Historial de transacciones</h1>
-      <section>
-        <!-- TODO: Historial de transacciones -->
-      </section>
-    </main>
-  </body>
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+
+  <!-- CSS propio -->
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+
+<body class="bg-light">
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-dark bg-primary">
+    <div class="container">
+      <a href="menu.html" class="navbar-brand">Alke Wallet</a>
+    </div>
+  </nav>
+
+  <!-- HISTORIAL -->
+  <main class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+
+        <div class="card shadow">
+          <div class="card-body">
+
+            <h3 class="text-center mb-4">Historial de transacciones</h3>
+
+            <ul id="listaTransacciones" class="list-group">
+              <!-- Transacciones dinámicas -->
+            </ul>
+
+            <p id="sinTransacciones" class="text-center text-muted mt-3 d-none">
+              No hay transacciones registradas
+            </p>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- JS propio -->
+  <script src="assets/js/main.js"></script>
+
+</body>
 </html>

@@ -1,42 +1,53 @@
-document.addEventListener("DOMContentLoaded", function () {
+// ======================
+// MAIN.JS COMPLETO CON JQUERY
+// ======================
+$(document).ready(function () {
+  const ruta = window.location.pathname;
 
   // ======================
-  // PROTECCIÓN DE MENÚ
+  // PROTECCIÓN DE RUTAS
   // ======================
-  if (window.location.pathname.includes("menu.html")) {
-    const saldo = localStorage.getItem("saldo");
-    if (saldo === null) {
-      window.location.href = "login.html";
-      return;
+  if (
+    ruta.includes("menu.html") ||
+    ruta.includes("sendmoney.html") ||
+    ruta.includes("deposit.html") ||
+    ruta.includes("transactions.html")
+  ) {
+    if (localStorage.getItem("saldo") === null) {
+      window.location.href = "./login.html";
     }
   }
 
   // ======================
   // LOGIN
   // ======================
-  const form = document.getElementById("loginForm");
-
-  if (form) {
-    form.addEventListener("submit", function (e) {
+  const $loginForm = $("#loginForm");
+  if ($loginForm.length) {
+    $loginForm.on("submit", function (e) {
       e.preventDefault();
 
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      const mensaje = document.getElementById("mensaje");
+      const email = $("#email").val().trim();
+      const password = $("#password").val().trim();
+      const $mensaje = $("#mensaje");
 
-      if (email === "" || password === "") {
-        mensaje.textContent = "Por favor, completa todos los campos";
-        mensaje.classList.remove("text-success");
-        mensaje.classList.add("text-danger");
+      if (!email || !password) {
+        $mensaje.text("Por favor, completa todos los campos")
+          .removeClass("text-success")
+          .addClass("text-danger");
         return;
       }
 
-      mensaje.textContent = "Login exitoso";
-      mensaje.classList.remove("text-danger");
-      mensaje.classList.add("text-success");
+      // Inicializar saldo si no existe
+      if (localStorage.getItem("saldo") === null) {
+        localStorage.setItem("saldo", 0);
+      }
+
+      $mensaje.text("Login exitoso")
+        .removeClass("text-danger")
+        .addClass("text-success");
 
       setTimeout(() => {
-        window.location.href = "menu.html";
+        window.location.href = "./menu.html";
       }, 1000);
     });
   }
@@ -44,36 +55,25 @@ document.addEventListener("DOMContentLoaded", function () {
   // ======================
   // SALDO - MENÚ
   // ======================
-  const saldoElemento = document.getElementById("saldo");
-
-  if (saldoElemento) {
-    let saldo = localStorage.getItem("saldo");
-
-    if (saldo === null) {
-      saldo = 0;
-      localStorage.setItem("saldo", saldo);
-    }
-
-    saldoElemento.textContent = `$${saldo}`;
+  const $saldoElemento = $("#saldo");
+  if ($saldoElemento.length) {
+    let saldo = localStorage.getItem("saldo") || 0;
+    $saldoElemento.text(`$${saldo}`);
   }
 
   // ======================
   // DEPÓSITO
   // ======================
-  const depositForm = document.getElementById("depositForm");
-
-  if (depositForm) {
-    depositForm.addEventListener("submit", function (e) {
+  const $depositForm = $("#depositForm");
+  if ($depositForm.length) {
+    $depositForm.on("submit", function (e) {
       e.preventDefault();
 
-      const montoInput = document.getElementById("monto");
-      const mensaje = document.getElementById("mensajeDeposito");
-      let monto = parseInt(montoInput.value);
+      const monto = parseInt($("#monto").val());
+      const $mensaje = $("#mensajeDeposito");
 
       if (isNaN(monto) || monto <= 0) {
-        mensaje.textContent = "Ingrese un monto válido";
-        mensaje.classList.remove("text-success");
-        mensaje.classList.add("text-danger");
+        $mensaje.text("Ingrese un monto válido").addClass("text-danger");
         return;
       }
 
@@ -81,73 +81,87 @@ document.addEventListener("DOMContentLoaded", function () {
       saldo += monto;
       localStorage.setItem("saldo", saldo);
 
-      // Guardar transacción
-      let transacciones =
-        JSON.parse(localStorage.getItem("transacciones")) || [];
+      let transacciones = JSON.parse(localStorage.getItem("transacciones")) || [];
       transacciones.push(`Depósito: +$${monto}`);
       localStorage.setItem("transacciones", JSON.stringify(transacciones));
 
-      mensaje.textContent = "Depósito realizado con éxito";
-      mensaje.classList.remove("text-danger");
-      mensaje.classList.add("text-success");
+      $mensaje.text("Depósito realizado con éxito")
+        .removeClass("text-danger")
+        .addClass("text-success");
 
-      montoInput.value = "";
+      $("#monto").val("");
 
       setTimeout(() => {
-        window.location.href = "menu.html";
+        window.location.href = "./menu.html";
       }, 1000);
     });
   }
 
   // ======================
+  // CONTACTOS - Autocompletar
+  // ======================
+  const $contactosList = $("#contactosList");
+  let contactos = JSON.parse(localStorage.getItem("contactos")) || ["Juan", "María", "Pedro", "Ana"];
+  localStorage.setItem("contactos", JSON.stringify(contactos));
+
+  function actualizarDatalist() {
+    if (!$contactosList.length) return;
+    $contactosList.empty();
+    contactos.forEach(c => {
+      $contactosList.append(`<option value="${c}">`);
+    });
+  }
+  actualizarDatalist();
+
+  // ======================
   // ENVIAR DINERO
   // ======================
-  const sendForm = document.getElementById("sendForm");
-
-  if (sendForm) {
-    sendForm.addEventListener("submit", function (e) {
+  const $sendForm = $("#sendForm");
+  if ($sendForm.length) {
+    $sendForm.on("submit", function (e) {
       e.preventDefault();
 
-      const contacto = document.getElementById("contacto").value.trim();
-      const montoEnviar = parseInt(
-        document.getElementById("montoEnviar").value
-      );
-      const mensaje = document.getElementById("mensajeEnvio");
+      const contacto = $("#contacto").val().trim();
+      const montoEnviar = parseInt($("#montoEnviar").val());
+      const $mensaje = $("#mensajeEnvio");
 
       let saldo = parseInt(localStorage.getItem("saldo")) || 0;
 
-      if (contacto === "" || isNaN(montoEnviar) || montoEnviar <= 0) {
-        mensaje.textContent = "Completa los datos correctamente";
-        mensaje.classList.remove("text-success");
-        mensaje.classList.add("text-danger");
+      if (!contacto || isNaN(montoEnviar) || montoEnviar <= 0) {
+        $mensaje.text("Completa los datos correctamente")
+          .removeClass("text-success")
+          .addClass("text-danger");
         return;
       }
 
       if (montoEnviar > saldo) {
-        mensaje.textContent = "Saldo insuficiente";
-        mensaje.classList.remove("text-success");
-        mensaje.classList.add("text-danger");
+        $mensaje.text("Saldo insuficiente")
+          .removeClass("text-success")
+          .addClass("text-danger");
         return;
       }
 
-      // Restar saldo
       saldo -= montoEnviar;
       localStorage.setItem("saldo", saldo);
 
-      // Guardar transacción
-      let transacciones =
-        JSON.parse(localStorage.getItem("transacciones")) || [];
+      let transacciones = JSON.parse(localStorage.getItem("transacciones")) || [];
       transacciones.push(`Envío a ${contacto}: -$${montoEnviar}`);
       localStorage.setItem("transacciones", JSON.stringify(transacciones));
 
-      mensaje.textContent = `Envío exitoso a ${contacto}`;
-      mensaje.classList.remove("text-danger");
-      mensaje.classList.add("text-success");
+      if (!contactos.includes(contacto)) {
+        contactos.push(contacto);
+        localStorage.setItem("contactos", JSON.stringify(contactos));
+        actualizarDatalist();
+      }
 
-      sendForm.reset();
+      $mensaje.text(`Envío exitoso a ${contacto}`)
+        .removeClass("text-danger")
+        .addClass("text-success");
+
+      $sendForm[0].reset();
 
       setTimeout(() => {
-        window.location.href = "menu.html";
+        window.location.href = "./menu.html";
       }, 1200);
     });
   }
@@ -155,23 +169,27 @@ document.addEventListener("DOMContentLoaded", function () {
   // ======================
   // HISTORIAL
   // ======================
-  const lista = document.getElementById("listaTransacciones");
-  const sinTransacciones = document.getElementById("sinTransacciones");
-
-  if (lista) {
-    const transacciones =
-      JSON.parse(localStorage.getItem("transacciones")) || [];
-
+  const $lista = $("#listaTransacciones");
+  const $sinTransacciones = $("#sinTransacciones");
+  if ($lista.length) {
+    const transacciones = JSON.parse(localStorage.getItem("transacciones")) || [];
     if (transacciones.length === 0) {
-      sinTransacciones.classList.remove("d-none");
+      $sinTransacciones.removeClass("d-none");
     } else {
-      transacciones.forEach((item) => {
-        const li = document.createElement("li");
-        li.className = "list-group-item";
-        li.textContent = item;
-        lista.appendChild(li);
+      transacciones.forEach(item => {
+        $lista.append(`<li class="list-group-item">${item}</li>`);
       });
     }
   }
 
+  // ======================
+  // CERRAR SESIÓN
+  // ======================
+  const $logoutBtn = $("#logoutBtn");
+  if ($logoutBtn.length) {
+    $logoutBtn.on("click", function () {
+      localStorage.clear();
+     window.location.href = "./index.html";
+    });
+  }
 });
